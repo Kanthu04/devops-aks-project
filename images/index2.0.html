@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function onClick(){
+            var a=2
+            var b=3
+            document.write(a+b)
+        }
+    </script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#pi").click(function(){
+                alert("Hello World.");
+            });
+        });
+    </script>
+    <script>
+        function add(){
+            var a=parseInt(document.getElementById("tb2").value);
+            var b=parseInt(document.getElementById("tb3").value);
+            var r=a+b;
+            var res=document.getElementById("tb4").value=r;
+        }
+    </script>
+</head>
+<body>
+    <h1>Hello World.</h1>
+    <p id="para"> this is a paragraph </p>
+    <script>
+        document.write("Hello World.")
+        document.getElementById("para").innerHTML="Written by using JS"
+    </script>
+    <button onclick="onClick()">Alert</button>
+    <button id="pi">jq</button>
+    <input type="text" id="tb1">
+    <br>
+    A <input type="text" id="tb2">
+    <br>
+    B <input type="text" id="tb3">
+    <br>
+    Result <input type="text" id="tb4">
+    <br>
+    <button onclick="add()">ADD</button>
+    <script>
+        document.getElementById("tb1").value="5"
+    </script>
+</body>
+</html>

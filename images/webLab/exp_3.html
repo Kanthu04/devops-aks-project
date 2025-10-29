@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+ <html lang="en" ng-app="myApp">
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Diviyasri S- Portfolio</title>
+ <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+ rel="stylesheet">
+ <style>* {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }body {font-family: 'Poppins', sans-serif;
+}header {
+ background-color: #2f3542;padding: 15px 0;text-align: center;color: white;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ }header h1 {
+ font-weight: 600;
+ }nav ul {list-style: none;margin-top: 10px;
+ }nav ul li {
+ display: inline;margin: 0 15px;
+ }nav ul li a {
+ text-decoration: none;color: #ffffff;font-weight: 400;
+ }nav ul li a:hover {text-decoration: underline;
+ }main {margin: 40px auto;width: 80%;max-width: 800px;
+ }.card {
+ input[type="text"],input[type="email"],input[type="password"] {
+ }button {
+ text-align: center;padding: 10px 0;background-color: #2f3542;color: white;position: fixed;width: 100%;
+ bottom: 0;
+ }</style>
+ <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+ <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+ <script>
+ var app = angular.module('myApp', ['ngRoute']);
+ app.config(function($routeProvider) {
+ $routeProvider.when('/personal-details', {
+ template: '<div class="card">' 
+
+    <p><strong>Name:</strong> Diviyasri S</p>
+ <p><strong>Phone:</strong> 9360396302</p>
+ <p><strong>Email:</strong> diviyaselladurai@gmail.com</p>
+ <p><strong>LinkedIn:</strong>
+    <a href="https://www.linkedin.com/in/diviyasri-s/"
+ target="_blank">Diviyasri S</a></p>
+ <p><strong>Education:</strong> Penultimate year of Computer Science and Engineering</p>
+ '</div>',controller: function() {}
+ }).when('/academic-details', {template: '<div class="card">' +'<h2>Academic Details</h2>' +
+ '<ul>' +'<li>B.Tech CSE at Karunya Institute of Technology and Sciences</li>' +
+ '<li>Microsoft Azure Fundamentals- Certification</li>' +
+ '<li>Microsoft Data Fundamentals- Certification</li>' +'</ul>' +'</div>',
+ controller: function() {}
+ }).when('/project-details', {
+ template: '<div class="card">' +
+ '<h2>Project / Internship Details</h2>' +'<ul>' +
+ '<li><strong>Data Analyst Intern</strong>- PrepInsta (May 2023- Aug 2023)</li>' +
+ '<li><strong>AI-Based Financial Planner:</strong> Developed predictive models for managing personal
+ finances.</li>' +
+ '<li><strong>Mobile Health Monitoring App:</strong> Built with Java and Firebase for tracking health
+ metrics.</li>' +
+ '<li><strong>NLP for Sentiment Analysis:</strong> Created an NLP pipeline for social media
+ analysis.</li>' +
+ '</ul>' +'</div>',
+ controller: function() {}
+ }).when('/login', {
+ template: '<div class="card">' +
+ '<h2>Login</h2>' +'<form ng-submit="login()">' +'<label>Username:</label>' +
