@@ -47,24 +47,41 @@ jobs:
       #     kubectl apply -f k8s/deployment.yaml
       #     kubectl apply -f k8s/service.yaml
       # --- COMBINED DEPLOYMENT STEP ---
-      - name: 6. Build KinD Cluster, Load Image, and Deploy
-        uses: helm/kind-action@v1.10.0 
+      # - name: 6. Build KinD Cluster, Load Image, and Deploy
+      #   uses: helm/kind-action@v1.10.0 
+      #   with:
+      #     # This deploys the cluster and loads the image in one reliable step
+      #     image: static-web-app:v1
+      #     config: |
+      #       kind: Cluster
+      #       apiVersion: kind.x-k8s.io/v1alpha4
+      #       name: kind-ci
+      #       nodes:
+      #       - role: control-plane
+      #         kubeadmConfigPatches:
+      #         - |
+      #           kind: InitConfiguration
+      #           nodeRegistration:
+      #             kubeletExtraArgs:
+      #               node-labels: "ingress-ready=true"
+      #   # Deploy using kubectl after KinD is set up
+      # OLD STEP 6 (The one that produced the error)
+# Note: You have two warnings in the previous image due to the 'image' input being nested incorrectly in your final push.
+
+# Replace the entire block starting with - name: 6. Build KinD Cluster, Load and Deploy with the following:
+
+      - name: 6. Setup KinD Cluster and Load Image
+        uses: helm/kind-action@v1.10.0
         with:
-          # This deploys the cluster and loads the image in one reliable step
-          image: static-web-app:v1
+          # Use the 'config' input to pass the inline YAML
           config: |
             kind: Cluster
             apiVersion: kind.x-k8s.io/v1alpha4
-            name: kind-ci
             nodes:
             - role: control-plane
-              kubeadmConfigPatches:
-              - |
-                kind: InitConfiguration
-                nodeRegistration:
-                  kubeletExtraArgs:
-                    node-labels: "ingress-ready=true"
-        # Deploy using kubectl after KinD is set up
+            
+          # The image input is separate and correct here
+          image: static-web-app:v1
       - name: 7. Apply Kubernetes Manifests
         run: |
           kubectl apply -f k8s/deployment.yaml
