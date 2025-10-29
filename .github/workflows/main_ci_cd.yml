@@ -36,16 +36,12 @@ jobs:
       - name: 6. Setup KinD Cluster and Load Image
         uses: helm/kind-action@v1.10.0
         with:
-          # The image input must NOT be under 'config'
+          # Tell KinD to use the configuration file created in Step 1
+          config: kind-config.yaml
+          
+          # Load the image you just built
           image: static-web-app:v1
           
-          # The config input MUST be followed by a pipe (|) and then indented 4 spaces
-          config: |
-            kind: Cluster
-            apiVersion: kind.x-k8s.io/v1alpha4
-            nodes:
-            - role: control-plane
-
       - name: 7. Apply Kubernetes Manifests
         run: |
           kubectl apply -f k8s/deployment.yaml
