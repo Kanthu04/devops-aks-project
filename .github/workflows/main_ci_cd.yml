@@ -87,15 +87,22 @@ jobs:
       # Step 7 is now much cleaner, applying the manifests to a clean slate.
       - name: 7. Apply Kubernetes Manifests and Patch ImagePullPolicy
         run: |
-          # 1. Apply service (ensures it exists)
+          # 1. Delete and apply commands remain the same, ensuring resources exist
+          kubectl delete deployment static-web-deployment --ignore-not-found=true --grace-period=0 --force
+          kubectl delete service static-web-service --ignore-not-found=true
           kubectl apply -f k8s/service.yaml
-          
-          # 2. Apply the deployment (recreates the resource)
           kubectl apply -f k8s/deployment.yaml
-
-          # 3. Patch the deployment with the correct local image tag and force pull policy.
+          
+          # 2. Patch the deployment with the image and pull policy
           kubectl set image deployment/static-web-deployment static-web-container=localhost:5000/static-web-app:v1
-          kubectl patch deployment static-web-deployment --patch '{"spec": {"template": {"spec": {"containers": [{"name": "static-web-container", "imagePullPolicy": "Never"}]}}}}'
+          kubectl patch deployment static-web-deployment -p '{"spec": {"template": {"spec": {"containers": [{"name": "static-web-container", "imagePullPolicy": "Never"}]}}}}'
+
+      # NEW STEP 7.5: Force Rolling Restart (The final push)
+      - name: 7.5 Force Rolling Restart
+        run: |
+          # The "touch" command updates an annotation, forcing Kubernetes to create a brand new pod instantly.
+          kubectl rollout restart deployment/static-web-deployment
+          sleep 10 # Wait 10 seconds for the rollout to begin
 
       - name: 8. Deployment Verification
         run: |
