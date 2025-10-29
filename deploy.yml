@@ -1,0 +1,15 @@
+---
+- name: Deploy Kubernetes Manifests to Local K8s
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Deploy static web Deployment
+      kubernetes.core.k8s:
+        state: present
+        src: ./k8s/deployment.yaml
+
+    - name: Deploy LoadBalancer Service
+      kubernetes.core.k8s:
+        state: present
+        src: ./k8s/service.yaml
