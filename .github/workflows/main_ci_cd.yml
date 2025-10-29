@@ -31,57 +31,21 @@ jobs:
 
       - name: 5. Simulate Push (Image built successfully, ready for deploy)
         run: echo "Image built and push to local cache is simulated."
-      
-      # # --- Deploy to Kubernetes (Local Simulation via KinD) ---
-      # - name: 6. Set up KinD (Kubernetes in Docker) Cluster
-      #   # This creates a temporary, self-contained K8s cluster for testing the deployment steps
-      #   uses: helm/kind-action@v1.10.0 
-
-      # - name: 7. Load Image into Simulated Cluster
-      #   # Transfer the built image from the runner's docker cache to the KinD cluster's node
-      #   run: kind load docker-image static-web-app:v1
-
-      # - name: 8. Deploy to Kubernetes
-      #   # Use kubectl to apply the manifests created in Phase 4
-      #   run: |
-      #     kubectl apply -f k8s/deployment.yaml
-      #     kubectl apply -f k8s/service.yaml
-      # --- COMBINED DEPLOYMENT STEP ---
-      # - name: 6. Build KinD Cluster, Load Image, and Deploy
-      #   uses: helm/kind-action@v1.10.0 
-      #   with:
-      #     # This deploys the cluster and loads the image in one reliable step
-      #     image: static-web-app:v1
-      #     config: |
-      #       kind: Cluster
-      #       apiVersion: kind.x-k8s.io/v1alpha4
-      #       name: kind-ci
-      #       nodes:
-      #       - role: control-plane
-      #         kubeadmConfigPatches:
-      #         - |
-      #           kind: InitConfiguration
-      #           nodeRegistration:
-      #             kubeletExtraArgs:
-      #               node-labels: "ingress-ready=true"
-      #   # Deploy using kubectl after KinD is set up
-      # OLD STEP 6 (The one that produced the error)
-# Note: You have two warnings in the previous image due to the 'image' input being nested incorrectly in your final push.
-
-# Replace the entire block starting with - name: 6. Build KinD Cluster, Load and Deploy with the following:
+      # Replace the entire block starting with - name: 6. Build KinD Cluster, Load and Deploy with the following:
 
       - name: 6. Setup KinD Cluster and Load Image
         uses: helm/kind-action@v1.10.0
         with:
-          # Use the 'config' input to pass the inline YAML
+          # The image input must NOT be under 'config'
+          image: static-web-app:v1
+          
+          # The config input MUST be followed by a pipe (|) and then indented 4 spaces
           config: |
             kind: Cluster
             apiVersion: kind.x-k8s.io/v1alpha4
             nodes:
             - role: control-plane
-            
-          # The image input is separate and correct here
-          image: static-web-app:v1
+
       - name: 7. Apply Kubernetes Manifests
         run: |
           kubectl apply -f k8s/deployment.yaml
