@@ -77,19 +77,23 @@ jobs:
       #     kubectl rollout status deployment/static-web-deployment --timeout=120s # Increased timeout
       #     kubectl get pods
       #     kubectl get svc
-      - name: 7. Apply Kubernetes Manifests and Patch ImagePullPolicy
+      # NEW STEP 6.5: Aggressively delete the deployment immediately after KinD is up.
+      - name: 6.5 Aggressively Delete Previous Deployment
         run: |
-          # 1. DELETE existing deployment and service to ensure a clean start
+          # Use a loop to wait briefly and aggressively delete old resources
           kubectl delete deployment static-web-deployment --ignore-not-found=true --grace-period=0 --force
           kubectl delete service static-web-service --ignore-not-found=true
 
-          # 2. Apply service (must be done first, as it's static)
+      # Step 7 is now much cleaner, applying the manifests to a clean slate.
+      - name: 7. Apply Kubernetes Manifests and Patch ImagePullPolicy
+        run: |
+          # 1. Apply service (ensures it exists)
           kubectl apply -f k8s/service.yaml
           
-          # 3. Apply the deployment (This recreates the resource)
+          # 2. Apply the deployment (recreates the resource)
           kubectl apply -f k8s/deployment.yaml
 
-          # 4. Patch the deployment with the correct local image tag and force pull policy.
+          # 3. Patch the deployment with the correct local image tag and force pull policy.
           kubectl set image deployment/static-web-deployment static-web-container=localhost:5000/static-web-app:v1
           kubectl patch deployment static-web-deployment --patch '{"spec": {"template": {"spec": {"containers": [{"name": "static-web-container", "imagePullPolicy": "Never"}]}}}}'
 
