@@ -32,22 +32,45 @@ jobs:
       - name: 5. Simulate Push (Image built successfully, ready for deploy)
         run: echo "Image built and push to local cache is simulated."
       
-      # --- Deploy to Kubernetes (Local Simulation via KinD) ---
-      - name: 6. Set up KinD (Kubernetes in Docker) Cluster
-        # This creates a temporary, self-contained K8s cluster for testing the deployment steps
+      # # --- Deploy to Kubernetes (Local Simulation via KinD) ---
+      # - name: 6. Set up KinD (Kubernetes in Docker) Cluster
+      #   # This creates a temporary, self-contained K8s cluster for testing the deployment steps
+      #   uses: helm/kind-action@v1.10.0 
+
+      # - name: 7. Load Image into Simulated Cluster
+      #   # Transfer the built image from the runner's docker cache to the KinD cluster's node
+      #   run: kind load docker-image static-web-app:v1
+
+      # - name: 8. Deploy to Kubernetes
+      #   # Use kubectl to apply the manifests created in Phase 4
+      #   run: |
+      #     kubectl apply -f k8s/deployment.yaml
+      #     kubectl apply -f k8s/service.yaml
+      # --- COMBINED DEPLOYMENT STEP ---
+      - name: 6. Build KinD Cluster, Load Image, and Deploy
         uses: helm/kind-action@v1.10.0 
-
-      - name: 7. Load Image into Simulated Cluster
-        # Transfer the built image from the runner's docker cache to the KinD cluster's node
-        run: kind load docker-image static-web-app:v1
-
-      - name: 8. Deploy to Kubernetes
-        # Use kubectl to apply the manifests created in Phase 4
+        with:
+          # This deploys the cluster and loads the image in one reliable step
+          image: static-web-app:v1
+          config: |
+            kind: Cluster
+            apiVersion: kind.x-k8s.io/v1alpha4
+            name: kind-ci
+            nodes:
+            - role: control-plane
+              kubeadmConfigPatches:
+              - |
+                kind: InitConfiguration
+                nodeRegistration:
+                  kubeletExtraArgs:
+                    node-labels: "ingress-ready=true"
+        # Deploy using kubectl after KinD is set up
+      - name: 7. Apply Kubernetes Manifests
         run: |
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
 
-      - name: 9. Deployment Verification
+      - name: 8. Deployment Verification
         run: |
           echo "Waiting for pod readiness..."
           # This command waits for the deployment to confirm it reached the 'Ready' state
