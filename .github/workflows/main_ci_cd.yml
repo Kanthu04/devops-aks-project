@@ -25,9 +25,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }} 
           password: ${{ secrets.DOCKER_PASSWORD }} 
 
+      # - name: 4. Build Docker Image (Using Dockerfile)
+      #   # Use the same image name/tag as your K8s deployment.yaml
+      #   run: docker build -t static-web-app:v1 .
+      # NEW Step 4: Use the reliable internal KinD tag format
       - name: 4. Build Docker Image (Using Dockerfile)
-        # Use the same image name/tag as your K8s deployment.yaml
-        run: docker build -t static-web-app:v1 .
+        run: docker build -t localhost:5000/static-web-app:v1 .
 
       - name: 5. Simulate Push (Image built successfully, ready for deploy)
         run: echo "Image built and push to local cache is simulated."
@@ -41,9 +44,16 @@ jobs:
           
           # Load the image you just built
           image: static-web-app:v1
-          
-      - name: 7. Apply Kubernetes Manifests
+
+      # - name: 7. Apply Kubernetes Manifests
+      #   run: |
+      #     kubectl apply -f k8s/deployment.yaml
+      #     kubectl apply -f k8s/service.yaml
+      # NEW Step 7: Patch the deployment file before applying it
+      - name: 7. Apply Kubernetes Manifests (with updated image tag)
         run: |
+          # Use sed to replace the old image name with the new localhost:5000 tag
+          sed -i 's|image: static-web-app:v1|image: localhost:5000/static-web-app:v1|g' k8s/deployment.yaml
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
 
