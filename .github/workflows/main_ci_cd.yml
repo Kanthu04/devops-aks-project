@@ -57,23 +57,46 @@ jobs:
       #     kubectl apply -f k8s/deployment.yaml
       #     kubectl apply -f k8s/service.yaml
       # NEW Step 7: Use kubectl set image and apply service separately
+      # - name: 7. Apply Kubernetes Manifests and Patch ImagePullPolicy
+      #   run: |
+      #     # 1. Apply the service (must be done first, as it's static)
+      #     kubectl apply -f k8s/service.yaml
+          
+      #     # 2. Apply the deployment (This creates the resource with the old image tag)
+      #     kubectl apply -f k8s/deployment.yaml
+
+      #     # 3. Patch the deployment with the correct local image tag and force pull policy.
+      #     # We use the deployment name and container name directly.
+      #     kubectl set image deployment/static-web-deployment static-web-container=localhost:5000/static-web-app:v1
+      #     kubectl patch deployment static-web-deployment --patch '{"spec": {"template": {"spec": {"containers": [{"name": "static-web-container", "imagePullPolicy": "Never"}]}}}}'
+          
+      # # NEW Step 8: Increase timeout to 120s
+      # - name: 8. Deployment Verification
+      #   run: |
+      #     echo "Waiting for pod readiness..."
+      #     kubectl rollout status deployment/static-web-deployment --timeout=120s # Increased timeout
+      #     kubectl get pods
+      #     kubectl get svc
       - name: 7. Apply Kubernetes Manifests and Patch ImagePullPolicy
         run: |
-          # 1. Apply the service (must be done first, as it's static)
+          # 1. DELETE existing deployment and service to ensure a clean start
+          kubectl delete deployment static-web-deployment --ignore-not-found=true --grace-period=0 --force
+          kubectl delete service static-web-service --ignore-not-found=true
+
+          # 2. Apply service (must be done first, as it's static)
           kubectl apply -f k8s/service.yaml
           
-          # 2. Apply the deployment (This creates the resource with the old image tag)
+          # 3. Apply the deployment (This recreates the resource)
           kubectl apply -f k8s/deployment.yaml
 
-          # 3. Patch the deployment with the correct local image tag and force pull policy.
-          # We use the deployment name and container name directly.
+          # 4. Patch the deployment with the correct local image tag and force pull policy.
           kubectl set image deployment/static-web-deployment static-web-container=localhost:5000/static-web-app:v1
           kubectl patch deployment static-web-deployment --patch '{"spec": {"template": {"spec": {"containers": [{"name": "static-web-container", "imagePullPolicy": "Never"}]}}}}'
-          
-      # NEW Step 8: Increase timeout to 120s
+
       - name: 8. Deployment Verification
         run: |
           echo "Waiting for pod readiness..."
-          kubectl rollout status deployment/static-web-deployment --timeout=120s # Increased timeout
+          # The timeout of 120s is fine, but this command will wait for the new pod to start.
+          kubectl rollout status deployment/static-web-deployment --timeout=120s 
           kubectl get pods
           kubectl get svc
